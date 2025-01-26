@@ -57,6 +57,9 @@ public class ChessPiece {
 
         if (type == PieceType.BISHOP) {
             bishopMoves(board, myPosition, moves);
+        } else if (type == PieceType.ROOK) {
+            rookMoves(board, myPosition, moves);
+
         }
         return moves;
     }
@@ -72,7 +75,34 @@ public class ChessPiece {
                 row += direction[0];
                 col += direction[1];
                 ChessPosition newPosition = new ChessPosition(row, col);
-                if (!inRange(newPosition)) {
+                if (inRange(newPosition)) {
+                    break;
+                }
+                if (freeSpace(board, newPosition)) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                } else {
+                    if (otherColor(board, newPosition)) {
+                        moves.add(new ChessMove(myPosition, newPosition, null));
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private void rookMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] directions = {
+                {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+        };
+        for (int[] direction : directions) {
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+
+            while (true) {
+                row += direction[0];
+                col += direction[1];
+                ChessPosition newPosition = new ChessPosition(row, col);
+                if (inRange(newPosition)) {
                     break;
                 }
                 if (freeSpace(board, newPosition)) {
@@ -89,7 +119,6 @@ public class ChessPiece {
 
 
 
-
     private boolean freeSpace(ChessBoard board, ChessPosition position) {
         return position.getRow() >= 1 && position.getRow() <= 8 &&
                 position.getColumn() >= 1 && position.getColumn() <= 8 &&
@@ -101,8 +130,8 @@ public class ChessPiece {
         return piece != null && piece.getTeamColor() != this.pieceColor;
     }
     private boolean inRange(ChessPosition position) {
-        return position.getRow() >= 1 && position.getRow() <= 8 &&
-                position.getColumn() >= 1 && position.getColumn() <= 8;
+        return position.getRow() < 1 || position.getRow() > 8 ||
+                position.getColumn() < 1 || position.getColumn() > 8;
     }
 
 
