@@ -63,6 +63,8 @@ public class ChessPiece {
             queenMoves(board, myPosition, moves);
         }else if (type == PieceType.KNIGHT) {
             knightMoves(board, myPosition, moves);
+        }else if (type == PieceType.KING) {
+            kingMoves(board, myPosition, moves);
         }
         return moves;
     }
@@ -165,6 +167,27 @@ public class ChessPiece {
             }
         }
     }
+
+    private void kingMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] directions = {
+                {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+        };
+        for (int[] direction : directions) {
+            int row = myPosition.getRow() + direction[0];
+            int col = myPosition.getColumn() + direction[1];
+            ChessPosition newPosition = new ChessPosition(row, col);
+            if (offBoard(newPosition)) {
+                continue;
+            }
+            if (freeSpace(board, newPosition)) {
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            } else if (otherColor(board, newPosition)) {
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            }
+        }
+    }
+
+
 
     private boolean freeSpace(ChessBoard board, ChessPosition position) {
         return position.getRow() >= 1 && position.getRow() <= 8 &&
