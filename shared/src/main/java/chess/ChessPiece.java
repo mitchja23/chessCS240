@@ -59,10 +59,10 @@ public class ChessPiece {
             bishopMoves(board, myPosition, moves);
         } else if (type == PieceType.ROOK) {
             rookMoves(board, myPosition, moves);
-
         } else if (type == PieceType.QUEEN) {
             queenMoves(board, myPosition, moves);
-
+        }else if (type == PieceType.KNIGHT) {
+            knightMoves(board, myPosition, moves);
         }
         return moves;
     }
@@ -147,7 +147,24 @@ public class ChessPiece {
         }
     }
 
-
+    private void knightMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int[][] directions = {
+                {2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {-2, -1}, {-1, -2}, {1, -2}, {2, -1}
+        };
+        for (int[] direction : directions) {
+            int row = myPosition.getRow() + direction[0];
+            int col = myPosition.getColumn() + direction[1];
+            ChessPosition newPosition = new ChessPosition(row, col);
+            if (offBoard(newPosition)) {
+                continue;
+            }
+            if (freeSpace(board, newPosition)) {
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            } else if (otherColor(board, newPosition)) {
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            }
+        }
+    }
 
     private boolean freeSpace(ChessBoard board, ChessPosition position) {
         return position.getRow() >= 1 && position.getRow() <= 8 &&
@@ -162,6 +179,12 @@ public class ChessPiece {
     private boolean inRange(ChessPosition position) {
         return position.getRow() < 1 || position.getRow() > 8 ||
                 position.getColumn() < 1 || position.getColumn() > 8;
+    }
+
+    private boolean offBoard(ChessPosition position) {
+        int row = position.getRow();
+        int col = position.getColumn();
+        return row < 1 || row > 8 || col < 1 || col > 8;
     }
 
 
