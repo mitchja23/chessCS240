@@ -33,6 +33,20 @@ public class ChessBoard {
             squares[7][col] = new ChessPiece(ChessGame.TeamColor.BLACK, backRow[col]);
         }
     }
+    public ChessBoard calcBoard() {
+        ChessBoard simBoard = new ChessBoard();
+
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = this.getPiece(pos);
+                if (piece != null) {
+                    simBoard.addPiece(pos, new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
+                }
+            }
+        }
+        return simBoard;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

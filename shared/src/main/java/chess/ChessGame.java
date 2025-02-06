@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -53,9 +54,62 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        ChessBoard board = getBoard();
+        ChessPiece piece = board.getPiece(startPosition);
 
-        return java.util.List.of();
+        if (piece == null) {
+            return null;
+        }
+
+        Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
+
+        Iterator<ChessMove> testMoves = possibleMoves.iterator();
+        while (testMoves.hasNext()) {
+            ChessMove move = testMoves.next();
+            ChessBoard currentBoard = board.calcBoard();
+            ChessPiece movingPiece = currentBoard.getPiece(startPosition);
+            currentBoard.addPiece(move.getEndPosition(), movingPiece);
+            currentBoard.addPiece(startPosition, null);
+
+            if (InCheckTest(currentBoard, piece.getTeamColor())) {
+                testMoves.remove(); // Remove the move if it leaves the king in check
+            }
+        }
+        return possibleMoves;
     }
+
+    private boolean InCheckTest(ChessBoard board, TeamColor teamColor) {
+        ChessPosition king = null;
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING
+                        && piece.getTeamColor() == teamColor) {
+                    king = position;
+                    break;
+                }
+            }
+        }
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> opponentMoves = piece.pieceMoves(board, position);
+
+                    for (ChessMove move : opponentMoves) {
+                        if (move.getEndPosition().equals(king)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Makes a move in a chess game
@@ -64,7 +118,35 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> moves = validMoves(move.getStartPosition());
+        if (!moves.contains(move)) {
+            throw new InvalidMoveException("Illegal move");
+        }
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        board.addPiece(move.getEndPosition(), piece);
+        board.addPiece(move.getStartPosition(), null);
+
+
+        ChessPiece opp = board.getPiece(move.getEndPosition());
+        if(opp != null && opp.getTeamColor() != colorTurn) {
+            board.addPiece(move.getEndPosition(), opp);
+        }
+
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            int promote = (piece.getTeamColor() == TeamColor.WHITE) ? 8 : 1;
+            if (move.getEndPosition().getRow() == promote) {
+                ChessPiece.PieceType upgrade = ChessPiece.PieceType.QUEEN;
+                ChessPiece newPiece = new ChessPiece(piece.getTeamColor(), upgrade);
+
+                board.addPiece(move.getEndPosition(), newPiece);
+            }
+        }
+
+
+
+        colorTurn = (colorTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+
+
     }
 
     /**
@@ -74,7 +156,11 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if(InCheckTest(board, teamColor)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
