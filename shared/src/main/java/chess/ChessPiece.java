@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -18,10 +19,6 @@ public class ChessPiece {
         this.pieceColor = pieceColor;
         this.type = type;
     }
-
-    /**
-     * The various different chess piece options
-     */
     public enum PieceType {
         KING,
         QUEEN,
@@ -30,31 +27,14 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
-
-    /**
-     * @return Which team this chess piece belongs to
-     */
     public ChessGame.TeamColor getTeamColor() {
         return pieceColor;
     }
-
-    /**
-     * @return which type of chess piece this piece is
-     */
     public PieceType getPieceType() {
         return type;
     }
-
-    /**
-     * Calculates all the positions a chess piece can move to
-     * Does not take into account moves that are illegal due to leaving the king in
-     * danger
-     *
-     * @return Collection of valid moves
-     */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
-
         if (type == PieceType.BISHOP) {
             bishopMoves(board, myPosition, moves);
         } else if (type == PieceType.ROOK) {
@@ -169,7 +149,6 @@ public class ChessPiece {
             }
         }
     }
-
     private void kingMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
         int[][] directions = {
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
@@ -188,8 +167,6 @@ public class ChessPiece {
             }
         }
     }
-
-
     private void pawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
         int row = (pieceColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
         int col = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
@@ -250,4 +227,18 @@ public class ChessPiece {
         int col = position.getColumn();
         return row < 1 || row > 8 || col < 1 || col > 8;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ChessPiece that = (ChessPiece) obj;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
+    }
+
 }
