@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -16,6 +17,8 @@ public class ChessGame {
 
     public ChessGame() {
         colorTurn = TeamColor.WHITE;
+        board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
@@ -23,7 +26,6 @@ public class ChessGame {
      */
     public TeamColor getTeamTurn() {
         return colorTurn;
-
     }
 
     /**
@@ -34,7 +36,6 @@ public class ChessGame {
 
 
     public void setTeamTurn(TeamColor team) {
-
         colorTurn = team;
     }
 
@@ -58,7 +59,7 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(startPosition);
 
         if (piece == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
@@ -72,7 +73,7 @@ public class ChessGame {
             currentBoard.addPiece(startPosition, null);
 
             if (InCheckTest(currentBoard, piece.getTeamColor())) {
-                testMoves.remove(); // Remove the move if it leaves the king in check
+                testMoves.remove();
             }
         }
         return possibleMoves;
@@ -109,8 +110,6 @@ public class ChessGame {
         }
         return false;
     }
-
-
     /**
      * Makes a move in a chess game
      *
@@ -120,9 +119,12 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> moves = validMoves(move.getStartPosition());
         if (!moves.contains(move)) {
-            throw new InvalidMoveException("Illegal move");
+            throw new InvalidMoveException("illegal move");
         }
         ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (piece.getTeamColor() != colorTurn) {
+            throw new InvalidMoveException("wrong turn");
+        }
         board.addPiece(move.getEndPosition(), piece);
         board.addPiece(move.getStartPosition(), null);
 
